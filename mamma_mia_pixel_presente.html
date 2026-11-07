@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Configurações PWA iPhone -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Presente da Sabrina">
+    <link rel="apple-touch-icon" href="https://api.iconify.design/lucide:gift.svg?color=%23ff2a85">
+
+    <title>Para a Sabrina 💙 - Nosso Aniversário</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Pixel & Retrô -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'mamma-blue': '#0077be',
+                        'mamma-light-blue': '#e0f2fe',
+                        'mamma-deep': '#003B46',
+                        'mamma-pink': '#ff2a85',
+                        'mamma-yellow': '#ffb703',
+                        'pixel-bg': '#f4ebd0',
+                    },
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'monospace'],
+                        vt: ['"VT323"', 'monospace'],
+                        sans: ['"Quicksand"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(180deg, #0077be 0%, #70e0d8 50%, #f4ebd0 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            image-rendering: pixelated;
+        }
+
+        /* Estilo de Borda Pixel 8-Bit */
+        .pixel-box {
+            position: relative;
+            background: #ffffff;
+            border: 4px solid #000000;
+            box-shadow: 
+                -4px 0 0 0 #000,
+                4px 0 0 0 #000,
+                0 -4px 0 0 #000,
+                0 4px 0 0 #000,
+                6px 6px 0 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .pixel-btn {
+            position: relative;
+            background: #ffb703;
+            border: 4px solid #000;
+            color: #000;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 0 #c28800;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+
+        .pixel-btn:active {
+            top: 4px;
+            box-shadow: 0 0 0 #c28800;
+        }
+
+        .pixel-btn-pink {
+            background: #ff2a85;
+            color: #fff;
+            box-shadow: 0 4px 0 #b3004b;
+        }
+        .pixel-btn-pink:active {
+            box-shadow: 0 0 0 #b3004b;
+        }
+
+        /* Animação Flutuante 8-bit */
+        @keyframes pixelFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .float-pixel {
+            animation: pixelFloat 2s infinite steps(4);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 5px #ffb703); }
+            50% { filter: drop-shadow(0 0 15px #ff2a85); }
+        }
+        .glow-pixel {
+            animation: pulseGlow 1.5s infinite;
+        }
+
+        /* Nuvens estilo Mamma Mia */
+        .pixel-cloud {
+            position: absolute;
+            background: #fff;
+            box-shadow: 
+                8px 0 0 #fff, -8px 0 0 #fff,
+                0 -8px 0 #fff, 0 8px 0 #fff,
+                16px 8px 0 #fff, -16px 8px 0 #fff;
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4 text-gray-900 relative">
+
+    <!-- Áudio de Fundo (Catbox - Lay All Your Love on Me) -->
+    <audio id="mammaAudio" loop preload="auto">
+        <source src="https://files.catbox.moe/j4om0u.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Elementos Decorativos -->
+    <div class="fixed top-4 left-4 w-10 h-10 bg-mamma-yellow border-4 border-black float-pixel z-0"></div>
+    <div class="pixel-cloud top-12 right-8 w-16 h-6 z-0"></div>
+    <div class="pixel-cloud top-32 left-12 w-24 h-8 z-0"></div>
+
+    <!-- BOTÃO FLUTUANTE DE MÚSICA -->
+    <div class="fixed top-4 right-4 z-50">
+        <button id="musicBtn" onclick="toggleAudio()" class="pixel-btn bg-white px-3 py-2 text-[9px] flex items-center gap-2">
+            <span id="musicIcon">🎵</span> <span id="musicText">LAY ALL YOUR LOVE ON ME</span>
+        </button>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="w-full max-w-md z-10 relative my-auto">
+
+        <!-- ==================== TELA 1: PRESENTE ==================== -->
+        <section id="screen1" class="pixel-box p-6 text-center space-y-6">
+            <div class="inline-block bg-mamma-light-blue px-3 py-1 border-2 border-black font-pixel text-[9px] text-mamma-blue">
+                MAMMA MIA! UMA SURPRESA ESPECIAL
+            </div>
+            
+            <h1 class="font-pixel text-xs text-mamma-pink leading-relaxed">
+                🎁 UM PRESENTE INESQUECÍVEL PARA A SABRINA 🎁
+            </h1>
+
+            <div class="my-6 cursor-pointer flex justify-center" onclick="openGift()">
+                <div class="relative float-pixel">
+                    <svg id="giftIcon" class="w-32 h-32 glow-pixel" viewBox="0 0 24 24" fill="none">
+                        <rect x="3" y="10" width="18" height="11" fill="#ff2a85" stroke="#000" stroke-width="1.5"/>
+                        <rect x="2" y="7" width="20" height="4" fill="#ff4097" stroke="#000" stroke-width="1.5"/>
+                        <rect x="10" y="7" width="4" height="14" fill="#ffb703"/>
+                        <rect x="2" y="8.5" width="20" height="1.5" fill="#ffb703"/>
+                        <path d="M7 4C7 2.5 9 2 12 5C15 2 17 2.5 17 4C17 6 14 7 12 7C10 7 7 6 7 4Z" fill="#ffb703" stroke="#000" stroke-width="1"/>
+                    </svg>
+                </div>
+            </div>
+
+            <p class="font-vt text-2xl text-gray-700">
+                Toque na caixinha para abrir 🎁
+            </p>
+
+            <button onclick="openGift()" class="pixel-btn pixel-btn-pink w-full py-3 text-xs tracking-wider">
+                ABRIR PRESENTE
+            </button>
+        </section>
+
+        <!-- ==================== TELA 2: HISTÓRIA & CANVAS PIXEL ART ==================== -->
+        <section id="screen2" class="pixel-box p-6 text-center space-y-4 hidden">
+            <div class="bg-white border-4 border-black p-3 shadow-[4px_4px_0_#000]">
+                <p class="font-vt text-2xl text-mamma-deep font-bold leading-tight">
+                    "Amor... no nosso aniversário dia 5 fui te comprar um buquê lindo na internet, mas a loja era GOLPE! 🤡😭"
+                </p>
+            </div>
+
+            <!-- Canvas Pixel Art: Rapaz Moreno com Corte Americano + Namorada + Buquê -->
+            <div class="border-4 border-black bg-white p-2 shadow-[4px_4px_0_#000] flex justify-center">
+                <canvas id="pixelCanvas" width="240" height="160" class="w-full h-auto"></canvas>
+            </div>
+
+            <p class="font-vt text-2xl text-mamma-pink font-bold">
+                "Mas como em Mamma Mia 'Everything is new', aceite este buquê digital exclusivo feito especialmente para você!" 💐💙
+            </p>
+
+            <button onclick="goToScreen(3)" class="pixel-btn pixel-btn-pink w-full py-3">
+                VER NOSSOS MOMENTOS 📸
+            </button>
+        </section>
+
+        <!-- ==================== TELA 3: GALERIA POLAROID (13 FOTOS) ==================== -->
+        <section id="screen3" class="pixel-box p-4 text-center space-y-4 hidden">
+            <div class="flex justify-between items-center border-b-2 border-black pb-2">
+                <span class="font-pixel text-[9px] text-mamma-pink">ÁLBUM DO CASAL</span>
+                <span id="photoCounter" class="font-pixel text-[9px] text-mamma-blue">1 / 13</span>
+            </div>
+
+            <div class="bg-white p-3 border-4 border-black shadow-[4px_4px_0_#000]">
+                <div class="relative w-full h-64 bg-gray-100 overflow-hidden border-2 border-black flex items-center justify-center">
+                    <img id="galleryImg" class="w-full h-full object-cover" src="" alt="Nossa Foto" onerror="this.src='https://placehold.co/400x300/0077be/ffffff?text=Nossa+Foto'">
+                </div>
+                <p id="galleryCaption" class="font-vt text-2xl text-mamma-deep mt-3 min-h-[40px] flex items-center justify-center font-bold">
+                    Carregando...
+                </p>
+            </div>
+
+            <div class="flex justify-between gap-2">
+                <button onclick="prevPhoto()" class="pixel-btn px-4 py-2 text-xs w-1/2">
+                    ⬅️ ANTERIOR
+                </button>
+                <button onclick="nextPhoto()" class="pixel-btn pixel-btn-pink px-4 py-2 text-xs w-1/2">
+                    PRÓXIMA ➡️
+                </button>
+            </div>
+
+            <button onclick="goToScreen(4)" class="pixel-btn bg-green-400 w-full py-3 text-xs mt-2">
+                ASSINAR CONTRATO DE AMOR 💍
+            </button>
+        </section>
+
+        <!-- ==================== TELA 4: CONTRATO DE AMOR ==================== -->
+        <section id="screen4" class="pixel-box p-5 text-center space-y-4 hidden max-h-[90vh] overflow-y-auto">
+            <h2 class="font-pixel text-xs text-mamma-pink leading-relaxed">
+                CONTRATO OFICIAL DE AMOR 📜
+            </h2>
+
+            <div class="bg-[#fffdf0] border-2 border-black p-4 font-vt text-left text-lg leading-tight space-y-2 shadow-[2px_2px_0_#000]">
+                <p class="font-bold text-center text-mamma-deep text-xl border-b-2 border-black pb-1 font-pixel text-[9px]">
+                    TERMO DE RENOVAÇÃO ETERNA
+                </p>
+                <p><strong>CLÁUSULA 1ª:</strong> O buquê digital substitui com amor ilimitado o golpe do dia 5.</p>
+                <p><strong>CLÁUSULA 2ª:</strong> Rir das piadas do Yury e maratonar Mamma Mia sempre que der.</p>
+                <p><strong>CLÁUSULA 3ª:</strong> Direito sagrado a abraços, sobremesas divididas e beijos diários.</p>
+                <p class="text-center font-bold text-mamma-pink pt-1">
+                    "Lay All Your Love on Me - Para Sempre!" 💙
+                </p>
+            </div>
+
+            <form onsubmit="assinarContrato(event)" class="space-y-3 text-left font-sans">
+                <div>
+                    <label class="font-pixel text-[8px] text-mamma-deep block mb-1">E-MAIL DA SABRINA:</label>
+                    <input type="email" id="email-sabrina" required placeholder="sabrina@gmail.com" 
+                           class="w-full p-2 border-2 border-black font-vt text-xl bg-white rounded-none">
+                </div>
+                <div>
+                    <label class="font-pixel text-[8px] text-mamma-deep block mb-1">E-MAIL DO YURY:</label>
+                    <input type="email" id="email-yury" required value="yuryribeiro.business@gmail.com" 
+                           class="w-full p-2 border-2 border-black font-vt text-xl bg-white rounded-none">
+                </div>
+
+                <button type="submit" id="submitBtn" class="pixel-btn pixel-btn-pink w-full py-3 text-xs">
+                    ✍️ ACEITAR E ASSINAR CONTRATO
+                </button>
+            </form>
+
+            <div class="relative w-full h-12 mt-2 flex items-center justify-center">
+                <button id="noBtn" 
+                        onmouseenter="runAway()" 
+                        onclick="runAway()" 
+                        ontouchstart="runAway(event)"
+                        class="pixel-btn bg-red-500 text-white px-6 py-2 text-xs absolute transition-all duration-150 ease-out z-20">
+                    RECUSAR 🛑
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // Inicialização do EmailJS com a Public Key do Yury
+        (function(){
+            emailjs.init("p5OyOhhzmsffNU2UR");
+        })();
+
+        // Lista das 13 Fotos Fornecidas
+        const photos = [
+            { url: "https://i.ibb.co/3s6806G/Whats-App-Image-2025-02-14-at-21-27-08-1.jpg", caption: "Para todo sempre, Yury e Sabrina! 💙" },
+            { url: "https://i.ibb.co/6R2n2Qc/Whats-App-Image-2025-02-14-at-21-27-08.jpg", caption: "Cada instante com você é puro encanto ✨" },
+            { url: "https://i.ibb.co/B2vWspw/Whats-App-Image-2025-02-14-at-21-27-09-1.jpg", caption: "Amor verdadeiro e parceria em tudo 🌴" },
+            { url: "https://i.ibb.co/S769r3Y/Whats-App-Image-2025-02-14-at-21-27-09-2.jpg", caption: "Meu raio de sol nos dias azuis! ☀️" },
+            { url: "https://i.ibb.co/Wc2v8Xh/Whats-App-Image-2025-02-14-at-21-27-09.jpg", caption: "Lado a lado em qualquer aventura 🗺️" },
+            { url: "https://i.ibb.co/b3wH07W/Whats-App-Image-2025-02-14-at-21-27-10-1.jpg", caption: "Nem o golpe do buquê estraga nosso dia! 😂" },
+            { url: "https://i.ibb.co/gR3Gk3L/Whats-App-Image-2025-02-14-at-21-27-10-2.jpg", caption: "Obrigado por ser quem você é 💖" },
+            { url: "https://i.ibb.co/Kz2KzG5/Whats-App-Image-2025-02-14-at-21-27-10.jpg", caption: "Construindo nossa história dia após dia 🏡" },
+            { url: "https://i.ibb.co/mCZ9N4C/Whats-App-Image-2025-02-14-at-21-27-11-1.jpg", caption: "Risadas garantidas e muito amor 🌸" },
+            { url: "https://i.ibb.co/v4bNq0L/Whats-App-Image-2025-02-14-at-21-27-11.jpg", caption: "Vibe inesquecível de Mamma Mia! ☀️" },
+            { url: "https://i.ibb.co/L1yZp2m/Whats-App-Image-2025-02-14-at-21-27-12-1.jpg", caption: "Minha parceira de todas as horas 💕" },
+            { url: "https://i.ibb.co/XF330Pz/Whats-App-Image-2025-02-14-at-21-27-12.jpg", caption: "Sempre comemorando a vida ao teu lado ✨" },
+            { url: "https://i.ibb.co/N1pZ7Q0/Whats-App-Image-2025-02-14-at-21-27-13.jpg", caption: "Momentos inesquecíveis juntas & juntos! 💍" }
+        ];
+
+        let currentPhotoIndex = 0;
+        let isPlaying = false;
+
+        function toggleAudio() {
+            const audio = document.getElementById('mammaAudio');
+            const icon = document.getElementById('musicIcon');
+            const text = document.getElementById('musicText');
+
+            if (!isPlaying) {
+                audio.play().then(() => {
+                    isPlaying = true;
+                    icon.innerText = "⏸️";
+                    text.innerText = "LAY ALL YOUR LOVE ON ME";
+                }).catch(e => console.log("Áudio necessita de interação prévia", e));
+            } else {
+                audio.pause();
+                isPlaying = false;
+                icon.innerText = "🎵";
+                text.innerText = "PLAY MÚSICA";
+            }
+        }
+
+        function goToScreen(screenNum) {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`screen${i}`).classList.add('hidden');
+            }
+            document.getElementById(`screen${screenNum}`).classList.remove('hidden');
+
+            if (screenNum === 2) {
+                drawPixelArt();
+            } else if (screenNum === 3) {
+                updateGallery();
+            }
+        }
+
+        function openGift() {
+            if (!isPlaying) toggleAudio();
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#0077be', '#ff2a85', '#ffb703', '#ffffff']
+            });
+            setTimeout(() => goToScreen(2), 400);
+        }
+
+        function drawPixelArt() {
+            const canvas = document.getElementById('pixelCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Céu / Fundo
+            ctx.fillStyle = '#e0f2fe';
+            ctx.fillRect(0, 0, 240, 160);
+
+            // Chão estilo grama/praia
+            ctx.fillStyle = '#70e0d8';
+            ctx.fillRect(0, 130, 240, 30);
+
+            // --- YURY (Rapaz Moreno com Cabelo Cacheado e Corte Americano) ---
+            // Camisa Azul
+            ctx.fillStyle = '#0077be';
+            ctx.fillRect(60, 80, 28, 50);
+            
+            // Pele Morena (Rosto e pescoço)
+            ctx.fillStyle = '#8d5524';
+            ctx.fillRect(66, 52, 16, 28);
+            
+            // Pernas
+            ctx.fillStyle = '#003B46';
+            ctx.fillRect(64, 130, 9, 20);
+            ctx.fillRect(77, 130, 9, 20);
+            
+            // Cabelo Cacheado + Corte Americano Fade
+            ctx.fillStyle = '#1a0d00';
+            ctx.fillRect(64, 44, 20, 10); // Topete cacheado
+            ctx.fillRect(66, 42, 16, 4);
+            // Lateral do degradê (Tom mais suave)
+            ctx.fillStyle = '#5c3a21';
+            ctx.fillRect(64, 52, 3, 10);
+            ctx.fillRect(79, 52, 3, 10);
+
+            // Olhos
+            ctx.fillStyle = '#000';
+            ctx.fillRect(69, 60, 3, 3);
+            ctx.fillRect(76, 60, 3, 3);
+
+            // --- SABRINA (Namorada) ---
+            // Vestido Rosa
+            ctx.fillStyle = '#ff2a85';
+            ctx.fillRect(150, 80, 26, 50);
+            
+            // Pele
+            ctx.fillStyle = '#ffdbac';
+            ctx.fillRect(155, 52, 16, 28);
+            
+            // Cabelo Castanho Longo
+            ctx.fillStyle = '#4a2c11';
+            ctx.fillRect(151, 46, 24, 34);
+
+            // Olhos
+            ctx.fillStyle = '#000';
+            ctx.fillRect(158, 60, 3, 3);
+            ctx.fillRect(164, 60, 3, 3);
+
+            // --- BUQUÊ DE FLORES ---
+            ctx.fillStyle = '#ff2a85'; // Flores rosa
+            ctx.fillRect(132, 85, 14, 14);
+            ctx.fillStyle = '#ffb703'; // Flores amarelas
+            ctx.fillRect(135, 82, 8, 8);
+            ctx.fillStyle = '#d4a373'; // Papel de embrulho
+            ctx.fillRect(136, 98, 8, 12);
+
+            // Coração Flutuante Pixel
+            ctx.fillStyle = '#ff2a85';
+            ctx.fillRect(115, 35, 10, 10);
+            ctx.fillRect(112, 32, 6, 6);
+            ctx.fillRect(122, 32, 6, 6);
+        }
+
+        function updateGallery() {
+            const photo = photos[currentPhotoIndex];
+            document.getElementById('galleryImg').src = photo.url;
+            document.getElementById('galleryCaption').innerText = photo.caption;
+            document.getElementById('photoCounter').innerText = `${currentPhotoIndex + 1} / ${photos.length}`;
+        }
+
+        function nextPhoto() {
+            currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+            updateGallery();
+        }
+
+        function prevPhoto() {
+            currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+            updateGallery();
+        }
+
+        function runaway(e) {
+            if (e) e.preventDefault();
+            const btn = document.getElementById('noBtn');
+            const randomX = (Math.random() - 0.5) * 180;
+            const randomY = (Math.random() - 0.5) * 80;
+            btn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+        }
+
+        function assinarContrato(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const wifeEmail = document.getElementById('email-sabrina').value;
+            const husbandEmail = document.getElementById('email-yury').value;
+
+            if(!wifeEmail) {
+                alert("Por favor, preencha o e-mail da Sabrina!");
+                return;
+            }
+
+            submitBtn.innerText = "ENVIANDO CONTRATO...";
+            submitBtn.disabled = true;
+
+            // Disparo Real pelo EmailJS
+            emailjs.send("service_19kafmo", "template_2eha2c6", {
+                email_sabrina: wifeEmail,
+                email_yury: husbandEmail
+            }, "p5OyOhhzmsffNU2UR")
+            .then(function(response) {
+                alert("💌 PARABÉNS! O contrato foi assinado e enviado com sucesso para os dois e-mails!");
+                submitBtn.innerText = "✍️ ACEITAR E ASSINAR CONTRATO";
+                submitBtn.disabled = false;
+                confetti({ particleCount: 150, spread: 90 });
+            }, function(error) {
+                alert("Erro ao enviar o e-mail: " + JSON.stringify(error));
+                submitBtn.innerText = "✍️ ACEITAR E ASSINAR CONTRATO";
+                submitBtn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
